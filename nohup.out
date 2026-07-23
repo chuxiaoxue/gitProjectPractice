@@ -1,0 +1,2 @@
+192.168.144.1 - - [23/Jul/2026 17:08:26] "GET /login.html HTTP/1.1" 200 -
+192.168.144.1 - - [23/Jul/2026 17:08:26] code 404, message File not found

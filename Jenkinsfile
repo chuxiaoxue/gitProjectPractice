@@ -6,7 +6,13 @@ pipeline {
             steps {
                 bat '''
                     ssh chuxiaoxue@192.168.144.63 ^
-                    "cd /mnt/d/python/gitProjectPractice && git pull && pkill -f 'python3 -m http.server' 2>/dev/null || true && nohup python3 -m http.server 8000 &"
+                    "cd /mnt/d/python/gitProjectPractice && ^
+                    git pull origin master && ^
+                    pkill -f 'python3 -m http.server' 2>/dev/null || true && ^
+                    nohup python3 -m http.server 8000 > /tmp/server.log 2>&1 & && ^
+                    sleep 2 && ^
+                    ps aux | grep python3 && ^
+                    echo '部署完成！'"
                 '''
             }
         }
