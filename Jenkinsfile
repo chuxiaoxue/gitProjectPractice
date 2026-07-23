@@ -10,10 +10,8 @@ pipeline {
         
         stage('部署到 WSL') {
             steps {
-                withCredentials([sshUserPrivateKey(credentialsId: 'wsl-ssh-key', keyFileVariable: 'SSH_KEY')]) {
+                withCredentials([sshUserPrivateKey(credentialsId: '65a4f714-3065-44c7-b135-08cc5106a2f1', keyFileVariable: 'SSH_KEY')]) {
                     bat '''
-                        @echo off
-                        set "SSH_KEY=%SSH_KEY%"
                         ssh -i "%SSH_KEY%" -o StrictHostKeyChecking=no chuxiaoxue@192.168.144.63 ^
                         "cd /mnt/d/python/gitProjectPractice && git pull origin master && ^
                         pkill -f 'python3 -m http.server' 2>/dev/null || true && ^
