@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>订单管理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .search-bar input,
+        .search-bar select,
+        .search-bar button {
+            padding: 10px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .search-bar input:focus,
+        .search-bar select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .search-bar input {
+            flex: 1;
+            min-width: 200px;
+            max-width: 300px;
+        }
+
+        .search-bar select {
+            min-width: 120px;
+        }
+
+        .search-bar button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .search-bar button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card .number {
+            font-size: 32px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-card .label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .stat-card.success .number { color: #10b981; }
+        .stat-card.warning .number { color: #f59e0b; }
+        .stat-card.danger .number { color: #ef4444; }
+
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #475569;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tr:hover {
+            background: #f8fafc;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status.pending {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .status.paid {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .status.shipped {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .status.completed {
+            background: #d1fae5;
+            color: #059669;
+        }
+
+        .status.cancelled {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-right: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn.view {
+            background: #e0e7ff;
+            color: #4338ca;
+        }
+
+        .action-btn.edit {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .action-btn.delete {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .pagination {
+            padding: 16px;
+            text-align: center;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .pagination button {
+            padding: 8px 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            margin: 0 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .pagination button:hover:not(:disabled) {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination span {
+            margin: 0 8px;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .search-bar {
+                flex-direction: column;
+            }
+
+            .search-bar input,
+            .search-bar select {
+                width: 100%;
+                max-width: none;
+            }
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            th, td {
+                padding: 10px 8px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📦 订单管理系统</h1>
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="搜索订单号、客户名称、商品...">
+                <select id="statusFilter">
+                    <option value="">全部状态</option>
+                    <option value="pending">待付款</option>
+                    <option value="paid">已付款</option>
+                    <option value="shipped">已发货</option>
+                    <option value="completed">已完成</option>
+                    <option value="cancelled">已取消</option>
+                </select>
+                <select id="sortBy">
+                    <option value="date-desc">最新订单</option>
+                    <option value="date-asc">最早订单</option>
+                    <option value="amount-desc">金额从高到低</option>
+                    <option value="amount-asc">金额从低到高</option>
+                </select>
+                <button onclick="searchOrders()">🔍 搜索</button>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="number" id="totalOrders">0</div>
+                <div class="label">总订单数</div>
+            </div>
+            <div class="stat-card success">
+                <div class="number" id="completedOrders">0</div>
+                <div class="label">已完成</div>
+            </div>
+            <div class="stat-card warning">
+                <div class="number" id="pendingOrders">0</div>
+                <div class="label">待处理</div>
+            </div>
+            <div class="stat-card danger">
+                <div class="number" id="cancelledOrders">0</div>
+                <div class="label">已取消</div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>订单号</th>
+                        <th>客户名称</th>
+                        <th>商品</th>
+                        <th>金额</th>
+                        <th>状态</th>
+                        <th>创建时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="orderTable">
+                </tbody>
+            </table>
+
+            <div class="pagination">
+                <button id="prevBtn" onclick="prevPage()" disabled>上一页</button>
+                <span id="pageInfo">第 1 页 / 共 1 页</span>
+                <button id="nextBtn" onclick="nextPage()">下一页</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 模拟订单数据
+        const mockOrders = [
+            { id: 'ORD20260723001', customer: '张三', product: 'iPhone 15 Pro', amount: 8999, status: 'completed', createTime: '2026-07-23 10:30:00' },
+            { id: 'ORD20260723002', customer: '李四', product: 'MacBook Pro 14', amount: 14999, status: 'shipped', createTime: '2026-07-23 09:15:00' },
+            { id: 'ORD20260723003', customer: '王五', product: 'AirPods Pro 2', amount: 1899, status: 'paid', createTime: '2026-07-22 16:45:00' },
+            { id: 'ORD20260723004', customer: '赵六', product: 'iPad Air', amount: 4799, status: 'pending', createTime: '2026-07-22 14:20:00' },
+            { id: 'ORD20260723005', customer: '钱七', product: 'Apple Watch Ultra', amount: 6299, status: 'completed', createTime: '2026-07-21 11:00:00' },
+            { id: 'ORD20260723006', customer: '孙八', product: 'Magic Keyboard', amount: 899, status: 'cancelled', createTime: '2026-07-21 08:30:00' },
+            { id: 'ORD20260723007', customer: '周九', product: 'HomePod mini', amount: 749, status: 'paid', createTime: '2026-07-20 17:15:00' },
+            { id: 'ORD20260723008', customer: '吴十', product: 'iPhone 15', amount: 6499, status: 'shipped', createTime: '2026-07-20 13:40:00' },
+            { id: 'ORD20260723009', customer: '郑十一', product: 'Mac Studio', amount: 19999, status: 'pending', createTime: '2026-07-19 10:00:00' },
+            { id: 'ORD20260723010', customer: '王小明', product: 'AirTag 4件装', amount: 779, status: 'completed', createTime: '2026-07-19 09:20:00' },
+            { id: 'ORD20260723011', customer: '李晓红', product: 'MacBook Air', amount: 8999, status: 'paid', createTime: '2026-07-18 15:30:00' },
+            { id: 'ORD20260723012', customer: '张大伟', product: 'Beats Studio Buds', amount: 1199, status: 'shipped', createTime: '2026-07-18 12:10:00' }
+        ];
+
+        const statusLabels = {
+            pending: '待付款',
+            paid: '已付款',
+            shipped: '已发货',
+            completed: '已完成',
+            cancelled: '已取消'
+        };
+
+        let currentPage = 1;
+        const pageSize = 6;
+        let filteredOrders = [...mockOrders];
+
+        function renderOrders() {
+            const start = (currentPage - 1) * pageSize;
+            const end = start + pageSize;
+            const pageOrders = filteredOrders.slice(start, end);
+            const tableBody = document.getElementById('orderTable');
+            
+            tableBody.innerHTML = pageOrders.map(order => `
+                <tr>
+                    <td><strong>${order.id}</strong></td>
+                    <td>${order.customer}</td>
+                    <td>${order.product}</td>
+                    <td>¥${order.amount.toLocaleString()}</td>
+                    <td><span class="status ${order.status}">${statusLabels[order.status]}</span></td>
+                    <td>${order.createTime}</td>
+                    <td>
+                        <button class="action-btn view" onclick="viewOrder('${order.id}')">查看</button>
+                        <button class="action-btn edit" onclick="editOrder('${order.id}')">编辑</button>
+                        <button class="action-btn delete" onclick="deleteOrder('${order.id}')">删除</button>
+                    </td>
+                </tr>
+            `).join('');
+
+            updatePagination();
+            updateStats();
+        }
+
+        function updatePagination() {
+            const totalPages = Math.ceil(filteredOrders.length / pageSize);
+            document.getElementById('pageInfo').textContent = `第 ${currentPage} 页 / 共 ${totalPages} 页`;
+            document.getElementById('prevBtn').disabled = currentPage === 1;
+            document.getElementById('nextBtn').disabled = currentPage >= totalPages;
+        }
+
+        function updateStats() {
+            const total = filteredOrders.length;
+            const completed = filteredOrders.filter(o => o.status === 'completed').length;
+            const pending = filteredOrders.filter(o => o.status === 'pending' || o.status === 'paid' || o.status === 'shipped').length;
+            const cancelled = filteredOrders.filter(o => o.status === 'cancelled').length;
+
+            document.getElementById('totalOrders').textContent = total;
+            document.getElementById('completedOrders').textContent = completed;
+            document.getElementById('pendingOrders').textContent = pending;
+            document.getElementById('cancelledOrders').textContent = cancelled;
+        }
+
+        function searchOrders() {
+            const keyword = document.getElementById('searchInput').value.toLowerCase();
+            const status = document.getElementById('statusFilter').value;
+            const sort = document.getElementById('sortBy').value;
+
+            filteredOrders = mockOrders.filter(order => {
+                const matchKeyword = order.id.toLowerCase().includes(keyword) ||
+                                   order.customer.toLowerCase().includes(keyword) ||
+                                   order.product.toLowerCase().includes(keyword);
+                const matchStatus = !status || order.status === status;
+                return matchKeyword && matchStatus;
+            });
+
+            // 排序
+            if (sort === 'date-desc') {
+                filteredOrders.sort((a, b) => new Date(b.createTime) - new Date(a.createTime));
+            } else if (sort === 'date-asc') {
+                filteredOrders.sort((a, b) => new Date(a.createTime) - new Date(b.createTime));
+            } else if (sort === 'amount-desc') {
+                filteredOrders.sort((a, b) => b.amount - a.amount);
+            } else if (sort === 'amount-asc') {
+                filteredOrders.sort((a, b) => a.amount - b.amount);
+            }
+
+            currentPage = 1;
+            renderOrders();
+        }
+
+        function prevPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                renderOrders();
+            }
+        }
+
+        function nextPage() {
+            const totalPages = Math.ceil(filteredOrders.length / pageSize);
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderOrders();
+            }
+        }
+
+        function viewOrder(orderId) {
+            const order = filteredOrders.find(o => o.id === orderId);
+            if (order) {
+                alert(`订单详情\n\n订单号: ${order.id}\n客户: ${order.customer}\n商品: ${order.product}\n金额: ¥${order.amount}\n状态: ${statusLabels[order.status]}\n创建时间: ${order.createTime}`);
+            }
+        }
+
+        function editOrder(orderId) {
+            alert(`编辑订单: ${orderId}`);
+        }
+
+        function deleteOrder(orderId) {
+            if (confirm(`确定要删除订单 ${orderId} 吗？`)) {
+                mockOrders = mockOrders.filter(o => o.id !== orderId);
+                searchOrders();
+                alert('订单已删除');
+            }
+        }
+
+        // 初始化
+        renderOrders();
+
+        // 回车键搜索
+        document.getElementById('searchInput').addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') {
+                searchOrders();
+            }
+        });
+    </script>
+</body>
+</html>
